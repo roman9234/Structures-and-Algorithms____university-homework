@@ -1,5 +1,5 @@
 from random import randint, random
-from being import Being
+from beinglab3 import BeingLab3
 
 
 def print_beings(_list):
@@ -22,16 +22,16 @@ def breed(being1, being2, genes_amount=10, random_mutation_probability=0.2) -> l
     _being1_slice2 = random_mutation(being1.genes[_slice_point:], probability=random_mutation_probability)
     _being2_slice1 = random_mutation(being2.genes[_slice_point:], probability=random_mutation_probability)
     _being2_slice2 = random_mutation(being2.genes[0:_slice_point], probability=random_mutation_probability)
-    _child1 = Being(_being1_slice1 + _being2_slice1)
-    _child2 = Being(_being1_slice2 + _being2_slice2)
+    _child1 = BeingLab3(_being1_slice1 + _being2_slice1)
+    _child2 = BeingLab3(_being1_slice2 + _being2_slice2)
     return [_child1, _child2]
 
 
 # Демонстрация
 if __name__ == "__main__":
     genes_amount = 10
-    being1 = Being([1 for x in range(genes_amount)])
-    being2 = Being([0 for x in range(genes_amount)])
+    being1 = BeingLab3([1 for x in range(genes_amount)])
+    being2 = BeingLab3([0 for x in range(genes_amount)])
     print(being1, being2)
 
     child1, child2 = breed(being1, being2)

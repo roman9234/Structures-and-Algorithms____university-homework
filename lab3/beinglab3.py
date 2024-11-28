@@ -1,4 +1,4 @@
-class Being:
+class BeingLab3:
 
     def __init__(self, genes):
         self.genes = genes

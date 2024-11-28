@@ -1,6 +1,6 @@
 from random import randint, random
 
-from being import Being
+from beinglab3 import BeingLab3
 from methods import breed, print_beings
 import matplotlib.pyplot as plt
 
@@ -22,7 +22,7 @@ for mutations in range(0,max_mutations):
 
     beings = []
     for i in range(population):
-        beings.append(Being([randint(0, 1) for x in range(genes_amount)]))
+        beings.append(BeingLab3([randint(0, 1) for x in range(genes_amount)]))
 
     i = 0
     while beings[0].get_guality() != genes_amount:
@@ -45,4 +45,4 @@ print(iterations_list)
 plt.xticks(mutations_list)
 plt.plot(mutations_list, iterations_list)
 plt.show()
-# print(f"на выведение идеального Being ушло {i} итераций")
+# print(f"на выведение идеального BeingLab3 ушло {i} итераций")
