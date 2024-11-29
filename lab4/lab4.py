@@ -1,150 +1,189 @@
-# Инициализация Pygame
-# import pygame
-# import sys
-#
-# pygame.init()
+import math
+import tkinter as tk
+from random import randint, random
+from Predator import Predator
+from Herbivore import Herbivore
+from Tree import Tree
 
-# Задаем размеры окна
-# width, height = 800, 600
-# screen = pygame.display.set_mode((width, height))
-# pygame.display.set_caption("Игра в жизнь")
-#
-# bg_color = (96, 153, 62)    # Цвет фона
-# grid_color = (0, 0, 0)  # Цвет сетки
-#
-# # Задаем размеры клеток
-# cell_size = 50
-#
-# # Заполняем фон
-# screen.fill(bg_color)
-#
-#
-# # Рисуем сетку
-# for x in range(0, width, cell_size):
-#     pygame.draw.line(screen, grid_color, (x, 0), (x, height))
-# for y in range(0, height, cell_size):
-#     pygame.draw.line(screen, grid_color, (0, y), (width, y))
-#
-#
-# while True:
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             pygame.quit()
-#             sys.exit()
-#     pygame.display.flip()
+# Размеры поля и правила мира
+tree_on_death = True
 
+width, height = 100, 80
+cell_size = 20
 
-# кружочки - травоядные
-# треугольники - деревья
-# звёздочки - хищники
+# width, height = 50, 40
+# cell_size = 20
 
+# width, height = 3, 3
+# cell_size = 20
 
-import pygame
-import sys
+# generation
+tree_probability = 0.05
+herbivore_probability = 0.01
+predator_probability = 0.01
 
-# Конфигурация
-CONFIG = {
-    "width": 800,
-    "height": 600,
-    "cell_size": 50,
-    "bg_color": (96, 153, 62),
-    "grid_color": (0, 0, 0),
-    "herbivore_color": (0, 255, 0),  # Травоядное - зелёный
-    "tree_color": (139, 69, 19),  # Дерево - коричневый
-    "predator_color": (255, 0, 0),  # Хищник - красный
-}
+# Tree
+tree_starting_energy = 5
+tree_min_breeding_energy = 20
+tree_breed_size = 1
+# tree_consumption_energy = 20
+tree_energy_per_tick = 1
+tree_energy_for_breeding = 10
 
+# Predator
+predator_starting_energy = 5
+predator_min_breeding_energy = 10
+predator_breeding_cost = 5
 
-# Функция для отрисовки сетки
-def draw_grid(screen, width, height, cell_size, grid_color):
-    for x in range(0, width, cell_size):
-        pygame.draw.line(screen, grid_color, (x, 0), (x, height))
-    for y in range(0, height, cell_size):
-        pygame.draw.line(screen, grid_color, (0, y), (width, y))
-
-
-# Функция для отрисовки элементов по координатам
-def draw_element(screen, x, y, cell_size, element_type):
-    """
-    Отрисовывает элемент на экране.
-    screen: Экран Pygame.
-    x: Координата X клетки.
-    y: Координата Y клетки.
-    cell_size: Размер клетки.
-    element_type: Тип элемента ("herbivore", "tree", "predator").
-    """
-    center_x = x * cell_size + cell_size // 2
-    center_y = y * cell_size + cell_size // 2
-    radius = cell_size // 3
-
-    if element_type == "herbivore":  # Травоядное (кружок)
-        pygame.draw.circle(screen, CONFIG["herbivore_color"], (center_x, center_y), radius)
-
-    elif element_type == "tree":  # Дерево (треугольник)
-        points = [
-            (center_x, center_y - radius),  # Вершина треугольника
-            (center_x - radius, center_y + radius),  # Левый нижний угол
-            (center_x + radius, center_y + radius),  # Правый нижний угол
-        ]
-        pygame.draw.polygon(screen, CONFIG["tree_color"], points)
-
-    elif element_type == "predator":  # Хищник (звёздочка)
-        star_points = [
-            (center_x, center_y - radius),  # Верхняя точка
-            (center_x + radius // 2, center_y - radius // 2),
-            (center_x + radius, center_y),
-            (center_x + radius // 2, center_y + radius // 2),
-            (center_x, center_y + radius),
-            (center_x - radius // 2, center_y + radius // 2),
-            (center_x - radius, center_y),
-            (center_x - radius // 2, center_y - radius // 2),
-        ]
-        pygame.draw.polygon(screen, CONFIG["predator_color"], star_points)
-
-
-# Основной цикл программы
-def main():
-    pygame.init()
-    screen = pygame.display.set_mode((CONFIG["width"], CONFIG["height"]))
-    pygame.display.set_caption("Игра в жизнь")
-
-    clock = pygame.time.Clock()
-
-    # Пример хранилища состояния клеток
-    grid_state = {
-        (3, 4): "herbivore",  # Травоядное в клетке (3, 4)
-        (5, 2): "tree",  # Дерево в клетке (5, 2)
-        (7, 8): "predator",  # Хищник в клетке (7, 8)
-    }
-
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-        # Рисуем фон
-        screen.fill(CONFIG["bg_color"])
-
-        # Рисуем сетку
-        draw_grid(screen, CONFIG["width"], CONFIG["height"], CONFIG["cell_size"], CONFIG["grid_color"])
-
-        # Рисуем элементы на основе состояния клеток
-        for (x, y), element_type in grid_state.items():
-            draw_element(screen, x, y, CONFIG["cell_size"], element_type)
-
-        pygame.display.flip()
-        clock.tick(60)
-
-    pygame.quit()
-    sys.exit()
-
-
-if __name__ == "__main__":
-    main()
+# Herbivore
+herbivore_starting_energy = 5
+herbivore_min_breeding_energy = 10
+herbivore_breeding_cost = 5
 
 
 
+# Генерация начального состояния
+def initialize_field(_field, probability=0.2):
+    none_probability = 1 - tree_probability - herbivore_probability - predator_probability
+    if none_probability <0:
+        raise Exception("Сумма вероятностей появления больше 1")
+    for y in range(len(_field)):
+        for x in range(len(_field[y])):
+            res = 0
+            q = random()
+            # Генерация
+            if q > none_probability:
+                if q <= 1 - herbivore_probability - predator_probability:
+                    res = Tree(randint(0,20))
+                elif q <= 1 - predator_probability:
+                    res = Herbivore()
+                else:
+                    res = Predator()
+            _field[y][x] = res
+
+
+# Обновление поля
+def update_field(_field):
+    _height = len(_field)
+    _width = len(_field[0])
+    _new_field = [[0 for _ in range(width)] for _ in range(height)]
+    # new_field = [[None for _ in range(_width)] for _ in range(_height)]
+
+
+    for y in range(len(_field)):
+        for x in range(len(_field[y])):
+            if _field[y][x] is not None:
+
+                if isinstance(_field[y][x], Tree):
+                    _new_field[y][x] = _field[y][x]
+                    # if this_field.lifespan >= tree_min_breeding_lifespan:
+                    if _field[y][x].energy >= tree_min_breeding_energy:
+
+                        breed = tree_breed_size
+                        # up
+                        if breed != 0:
+                            if y > 0:
+                                if _field[y-1][x] == 0:
+                                    _new_field[y-1][x] = Tree(tree_starting_energy)
+                                    breed -= 1
+                        # right
+                        if breed != 0:
+                            if x < width-1:
+                                if _field[y][x+1] == 0:
+                                    _new_field[y][x+1] = Tree(tree_starting_energy)
+                                    breed -= 1
+                        # down
+                        if breed != 0:
+                            if y < height - 1:
+                                if _field[y+1][x] == 0:
+                                    _new_field[y+1][x] = Tree(tree_starting_energy)
+                                    breed -= 1
+                        # left
+                        if breed != 0:
+                            if x > 0:
+                                if _field[y][x-1] == 0:
+                                    _new_field[y][x-1] = Tree(tree_starting_energy)
+                                    breed -= 1
+                        _new_field[y][x].energy -= tree_energy_for_breeding
+                    _new_field[y][x].energy += tree_energy_per_tick
+
+
+
+                elif isinstance(_field[y][x], Herbivore):
+                    _new_field[y][x] = _field[y][x]
+                elif isinstance(_field[y][x], Predator):
+                    _new_field[y][x] = _field[y][x]
+
+
+
+    return _new_field
+
+
+# Рисование игрового поля
+def draw_field(_canvas, _field, _cell_size=10):
+    _canvas.delete("all")
+    for y in range(len(_field)):
+        for x in range(len(_field[y])):
+            if _field[y][x] is not None:
+
+                if isinstance(_field[y][x], Tree):
+                    _canvas.create_polygon( # Зелёные треугольники
+                        x * _cell_size + _cell_size // 2,
+                        y * _cell_size,
+                        x * _cell_size,
+                        y * _cell_size + _cell_size,
+                        (x + 1) * _cell_size, y * _cell_size + _cell_size,
+                        fill="green", outline=""
+                    )
+                elif isinstance(_field[y][x], Herbivore):
+                    _canvas.create_oval(
+                        x * _cell_size, y * _cell_size,
+                        (x + 1) * _cell_size, (y + 1) * _cell_size,
+                        fill="grey", outline=""
+                    )
+                elif isinstance(_field[y][x], Predator):
+                    _canvas.create_oval(
+                        x * _cell_size, y * _cell_size,
+                        (x + 1) * _cell_size, (y + 1) * _cell_size,
+                        fill="red", outline=""
+                    )
+
+
+# Шаг симуляции
+def step():
+    global field
+    field = update_field(field)
+    draw_field(canvas, field)
+
+# Инициализация интерфейса
+root = tk.Tk()
+root.title("Игра Жизнь")
+
+canvas = tk.Canvas(root, width=width * cell_size/2, height=height * cell_size/2, bg="white")
+canvas.pack()
+
+button_frame = tk.Frame(root)
+button_frame.pack()
+
+step_button = tk.Button(button_frame, text="Шаг", command=step)
+step_button.pack(side=tk.LEFT)
+
+# Создаём начальное поле
+field = [[None for _ in range(width)] for _ in range(height)]
+
+def regenerate(_field, _canvas):
+    initialize_field(_field)
+    draw_field(_canvas, _field)
+
+
+initialize_button = tk.Button(button_frame, text="Генерация", command=lambda: regenerate(field, canvas))
+initialize_button.pack(side=tk.LEFT)
+
+# Генерация начального состояния и отрисовка
+initialize_field(field)
+draw_field(canvas, field)
+
+root.mainloop()
 
 
 
