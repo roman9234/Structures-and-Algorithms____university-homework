@@ -1,13 +1,9 @@
-from Predator import Predator
-from Herbivore import Herbivore
-from Tree import Tree
+from random import shuffle
 
+q = [1,3,67,98]
 
-q = Predator()
+s = q.copy()
+s[2] += 200
+d = q.copy()
 
-if isinstance(q, Tree):
-    print("Tree")
-if isinstance(q, Herbivore):
-    print("Herbivore")
-if isinstance(q, Predator):
-    print("Predator")
+print(d)
