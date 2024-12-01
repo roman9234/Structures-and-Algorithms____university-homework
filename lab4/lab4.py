@@ -1,4 +1,6 @@
 import math
+import threading
+import time
 import tkinter as tk
 from random import randint, random
 from Predator import Predator
@@ -7,15 +9,16 @@ from Tree import Tree
 
 # Размеры поля и правила мира
 tree_on_death = True
-
-width, height = 100, 80
 cell_size = 20
 
+# width, height = 100, 80
+
 # width, height = 50, 40
-# cell_size = 20
+
+
+width, height = 25, 20
 
 # width, height = 3, 3
-# cell_size = 20
 
 # generation
 tree_probability = 0.05
@@ -62,6 +65,7 @@ def initialize_field(_field, probability=0.2):
             _field[y][x] = res
 
 
+
 # Обновление поля
 def update_field(_field):
     _height = len(_field)
@@ -76,7 +80,6 @@ def update_field(_field):
 
                 if isinstance(_field[y][x], Tree):
                     _new_field[y][x] = _field[y][x]
-                    # if this_field.lifespan >= tree_min_breeding_lifespan:
                     if _field[y][x].energy >= tree_min_breeding_energy:
 
                         breed = tree_breed_size
@@ -121,7 +124,7 @@ def update_field(_field):
 
 # Рисование игрового поля
 def draw_field(_canvas, _field, _cell_size=10):
-    _canvas.delete("all")
+    # _canvas.delete("all")
     for y in range(len(_field)):
         for x in range(len(_field[y])):
             if _field[y][x] is not None:
@@ -149,11 +152,39 @@ def draw_field(_canvas, _field, _cell_size=10):
                     )
 
 
+field = [[None for _ in range(width)] for _ in range(height)]
 # Шаг симуляции
 def step():
     global field
     field = update_field(field)
     draw_field(canvas, field)
+
+# Создаём начальное поле
+def regenerate(_field, _canvas):
+    initialize_field(_field)
+    draw_field(_canvas, _field)
+
+# Флаг для управления симуляцией
+simulation_running = False
+
+def toggle_simulation():
+    global simulation_running
+    if simulation_running:
+        simulation_running = False  # Остановить симуляцию
+        start_stop_button.config(text="Начать симуляцию")
+    else:
+        simulation_running = True  # Запустить симуляцию
+        start_stop_button.config(text="Остановить симуляцию")
+        threading.Thread(target=run_simulation, daemon=True).start()
+        # threading.Thread(target=step, daemon=True).start()
+
+def run_simulation():
+    while simulation_running:
+        global field
+        field = update_field(field)
+        draw_field(canvas, field)
+        time.sleep(0.2)
+
 
 # Инициализация интерфейса
 root = tk.Tk()
@@ -168,16 +199,13 @@ button_frame.pack()
 step_button = tk.Button(button_frame, text="Шаг", command=step)
 step_button.pack(side=tk.LEFT)
 
-# Создаём начальное поле
-field = [[None for _ in range(width)] for _ in range(height)]
-
-def regenerate(_field, _canvas):
-    initialize_field(_field)
-    draw_field(_canvas, _field)
-
 
 initialize_button = tk.Button(button_frame, text="Генерация", command=lambda: regenerate(field, canvas))
 initialize_button.pack(side=tk.LEFT)
+
+start_stop_button = tk.Button(button_frame, text="Начать симуляцию", command=toggle_simulation)
+start_stop_button.pack(side=tk.LEFT)
+
 
 # Генерация начального состояния и отрисовка
 initialize_field(field)
