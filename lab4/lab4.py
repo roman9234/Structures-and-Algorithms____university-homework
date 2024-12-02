@@ -3,9 +3,6 @@ import threading
 import time
 import tkinter as tk
 from random import randint, random, shuffle
-from Predator import Predator
-from Herbivore import Herbivore
-from Tree import Tree
 
 # Правила мира
 tree_on_death = True
@@ -97,10 +94,6 @@ predator_energy_per_tick = -1
 predator_min_movement_distance = 10
 predator_max_movement_distance = 20
 
-
-# системные переменные (нужны для симуляции)
-new_amount_of_trees = 0
-old_amount_of_trees = 0
 
 
 # Генерация начального состояния
